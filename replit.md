@@ -4,6 +4,13 @@
 
 This is a web-based Leads Management System built with FastAPI backend and vanilla JavaScript frontend. The system manages and displays lead data from multiple sources (schools and sales navigator), allowing users to filter, search, and view detailed information about leads stored in a SQLite database.
 
+## Recent Changes (July 2025)
+
+- **Fixed table filtering issue**: Resolved problem where table content wasn't updating when filters were applied
+- **Added statistics dashboard**: Implemented real-time statistics showing total users and breakdown by source (Schools Only, Sales Navigator Only, Both Tables)
+- **Enhanced user experience**: Statistics update dynamically as filters are applied, providing immediate feedback
+- **Improved DataTable management**: Fixed DataTable initialization and destruction to ensure proper table updates
+
 ## User Preferences
 
 Preferred communication style: Simple, everyday language.

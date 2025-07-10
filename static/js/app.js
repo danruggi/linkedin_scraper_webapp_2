@@ -104,6 +104,7 @@ class LeadsManager {
             this.filteredUsers = [...this.users];
             this.renderUsersTable();
             this.updateUserCount();
+            this.updateStatistics();
         } catch (error) {
             console.error('Error loading users:', error);
             this.showError('Failed to load users data');
@@ -136,6 +137,7 @@ class LeadsManager {
             this.filteredUsers = await response.json();
             this.renderUsersTable();
             this.updateUserCount();
+            this.updateStatistics();
         } catch (error) {
             console.error('Error applying filters:', error);
             this.showError('Failed to apply filters');
@@ -156,11 +158,28 @@ class LeadsManager {
 
     // Render users table
     renderUsersTable() {
+        // Destroy existing DataTable if it exists
+        if (this.dataTable) {
+            this.dataTable.destroy();
+            this.dataTable = null;
+        }
+
         const tbody = $('#usersTable tbody');
         tbody.empty();
 
         if (this.filteredUsers.length === 0) {
             tbody.append(this.createEmptyStateRow());
+            // Initialize DataTable even for empty state
+            this.dataTable = $('#usersTable').DataTable({
+                paging: false,
+                searching: false,
+                ordering: false,
+                info: false,
+                responsive: true,
+                language: {
+                    emptyTable: "No users found matching the current filters"
+                }
+            });
             return;
         }
 
@@ -169,11 +188,7 @@ class LeadsManager {
             tbody.append(row);
         });
 
-        // Initialize or reinitialize DataTable
-        if (this.dataTable) {
-            this.dataTable.destroy();
-        }
-        
+        // Initialize DataTable with data
         this.dataTable = $('#usersTable').DataTable({
             paging: true,
             pageLength: 25,
@@ -373,6 +388,41 @@ class LeadsManager {
         const count = this.filteredUsers.length;
         const total = this.users.length;
         $('#userCount').text(`${count} of ${total} users`);
+    }
+
+    // Update statistics
+    updateStatistics() {
+        const stats = this.calculateStatistics();
+        $('#totalUsers').text(stats.total);
+        $('#schoolsOnlyCount').text(stats.schoolsOnly);
+        $('#salesnavOnlyCount').text(stats.salesnavOnly);
+        $('#bothTablesCount').text(stats.bothTables);
+    }
+
+    // Calculate statistics from filtered users
+    calculateStatistics() {
+        const stats = {
+            total: this.filteredUsers.length,
+            schoolsOnly: 0,
+            salesnavOnly: 0,
+            bothTables: 0
+        };
+
+        this.filteredUsers.forEach(user => {
+            switch(user.source_category) {
+                case 'schools_only':
+                    stats.schoolsOnly++;
+                    break;
+                case 'salesnav_only':
+                    stats.salesnavOnly++;
+                    break;
+                case 'both':
+                    stats.bothTables++;
+                    break;
+            }
+        });
+
+        return stats;
     }
 
     // Show error message
